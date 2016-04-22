@@ -39,6 +39,15 @@
             android:textColorHint="#cccccc"
             android:password="true"
             android:drawableLeft="@drawable/password"/>
+
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Keep me logged in"
+            android:id="@+id/chbxKeepLogged" />
+
         <Button
             android:id="@+id/btnSingIn"
             android:layout_width="match_parent"
