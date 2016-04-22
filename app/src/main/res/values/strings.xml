@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">LoginAppFB</string>
+    <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="profile_string">Profile</string>
+    <string name="favorites_string">Favorites</string>
+    <string name="my_recipes">My Recipes</string>
+    <string name="search_string">Search</string>
+    <string name="exit_string">Log out</string>
+</resources>
