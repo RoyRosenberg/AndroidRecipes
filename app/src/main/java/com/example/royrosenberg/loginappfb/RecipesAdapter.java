@@ -77,8 +77,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 Recipe r =  (Recipe)v.getTag();
-                //MessageBox msg = new MessageBox(v.getContext());
-                //msg.Show("Edit?", "Confirm", MessageBox.MessageBoxButtons.OK);
+
                 Intent intent = new Intent(v.getContext(), RecipeEditActivity.class);
                 intent.putExtra("RecipeObj", r);
                 intent.putExtra("UserObj", _currentUser);

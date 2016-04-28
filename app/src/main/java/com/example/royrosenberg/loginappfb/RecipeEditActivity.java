@@ -1,11 +1,16 @@
 package com.example.royrosenberg.loginappfb;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.example.royrosenberg.loginappfb.DM.Recipe;
 import com.example.royrosenberg.loginappfb.DM.User;
@@ -19,6 +24,9 @@ public class RecipeEditActivity extends AppCompatActivity {
     private RecipeManager _recipeMngr;
     private int MODE;//0 - add, 1 - edit
     private User _currentUser;
+    private ImageView _addNewRecipeImage;
+    private ImageView imgCbGallery;
+    private static int RESULT_LOAD = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,22 +34,32 @@ public class RecipeEditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipe_edit);
 
         LoadControls();
+        _addNewRecipeImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+                startActivityForResult(intent, RESULT_LOAD);
+            }
+        });
+
 
         _recipeMngr = new RecipeManager(this);
 
         //if recipe is set -> in edit mode, else in add mode
         MODE = 0; //default: add mode
         Bundle bundle = getIntent().getExtras();
-        if(bundle != null) {
-            _currentUser = (User)bundle.get("UserObj");
+        if (bundle != null) {
+            _currentUser = (User) bundle.get("UserObj");
             if (bundle.get("RecipeObj") != null) {
                 //edit mode
                 MODE = 1;
-                setRecipeToControls((Recipe)bundle.get("RecipeObj"));
+                setRecipeToControls((Recipe) bundle.get("RecipeObj"));
             }
         }
 
-        if(MODE == 0){
+        if (MODE == 0) {
             setTitle("Add Recipe");
         } else {
             setTitle("Edit Recipe");
@@ -49,21 +67,23 @@ public class RecipeEditActivity extends AppCompatActivity {
     }
 
     private void LoadControls() {
-        _button = (Button)findViewById(R.id.btnSaveRecipe);
+        _button = (Button) findViewById(R.id.btnSaveRecipe);
         _button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 btnSave_click(v);
             }
         });
-        _etName = (EditText)findViewById(R.id.etRecipeName);
-        _etDesc = (EditText)findViewById(R.id.etRecipeDescription);
-        _etSteps = (EditText)findViewById(R.id.etRecipeSteps);
+        _etName = (EditText) findViewById(R.id.etRecipeName);
+        _etDesc = (EditText) findViewById(R.id.etRecipeDescription);
+        _etSteps = (EditText) findViewById(R.id.etRecipeSteps);
+        _addNewRecipeImage = (ImageView) findViewById(R.id.addNewRecipeImage);
     }
 
-    public void btnSave_click(View view){
+    public void btnSave_click(View view) {
         //add
         Recipe r = getRecipeFromControls();
+
         final MessageBox msgBx = new MessageBox(this);
 
         _recipeMngr.AddRecipe(r, new RecipeManager.RecipeCreationEvents() {
@@ -91,7 +111,7 @@ public class RecipeEditActivity extends AppCompatActivity {
         //edit
     }
 
-    private Recipe getRecipeFromControls(){
+    private Recipe getRecipeFromControls() {
         Recipe recipe = new Recipe();
         recipe.Name = _etName.getText().toString();
         recipe.ShortDescription = _etDesc.getText().toString();
@@ -100,15 +120,34 @@ public class RecipeEditActivity extends AppCompatActivity {
         return recipe;
     }
 
-    private void setRecipeToControls(Recipe recipe){
+    private void setRecipeToControls(Recipe recipe) {
         _etName.setText(recipe.Name);
         _etDesc.setText(recipe.ShortDescription);
         _etSteps.setText(recipe.Steps);
     }
 
-    private void goBackToMainPage(){
+    private void goBackToMainPage() {
         Intent intent = new Intent(this, WelcomeActivity.class);
         intent.putExtra("UserObj", _currentUser);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RESULT_LOAD && resultCode == RESULT_OK && data != null) {
+            Uri selectMode = data.getData();
+            String[] imagesArr = {MediaStore.Images.Media.DATA};
+
+            Cursor cursor = getContentResolver().query(selectMode, imagesArr, null, null, null);
+            cursor.moveToFirst();
+
+            int getColumnIndex = cursor.getColumnIndex(imagesArr[0]);
+            String picPath = cursor.getString(getColumnIndex);
+            cursor.close();
+
+            imgCbGallery.setImageBitmap(BitmapFactory.decodeFile(picPath));
+        }
     }
 }
