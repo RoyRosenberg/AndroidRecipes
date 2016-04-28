@@ -1,5 +1,6 @@
 package com.example.royrosenberg.loginappfb;
 
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.royrosenberg.loginappfb.DM.Recipe;
+import com.example.royrosenberg.loginappfb.DM.User;
 import com.example.royrosenberg.loginappfb.Services.RecipeManager;
 import com.example.royrosenberg.loginappfb.Utils.MessageBox;
 import com.firebase.client.Firebase;
@@ -24,10 +26,12 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
 
     private ArrayList<Recipe> _recipeList;
     private RecipeManager _recipesMngr;
+    private User _currentUser;
 
-    public RecipesAdapter(ArrayList<Recipe> recipeList, RecipeManager mngr) {
+    public RecipesAdapter(ArrayList<Recipe> recipeList, RecipeManager mngr, User loggedUser) {
         _recipeList = recipeList;
         _recipesMngr = mngr;
+        _currentUser = loggedUser;
     }
 
     @Override
@@ -72,9 +76,14 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Recipe r =  (Recipe)v.getTag();
-                MessageBox msg = new MessageBox(v.getContext());
-                msg.Show("Edit?", "Confirm", MessageBox.MessageBoxButtons.OK);
+                Recipe r =  (Recipe)v.getTag();
+                //MessageBox msg = new MessageBox(v.getContext());
+                //msg.Show("Edit?", "Confirm", MessageBox.MessageBoxButtons.OK);
+                Intent intent = new Intent(v.getContext(), RecipeEditActivity.class);
+                intent.putExtra("RecipeObj", r);
+                intent.putExtra("UserObj", _currentUser);
+                v.getContext().startActivity(intent);
+                //startActivity(intent);
             }
         });
         holder.btnFavorite.setOnClickListener(new View.OnClickListener() {

@@ -37,6 +37,7 @@ public class RecipeEditActivity extends AppCompatActivity {
             if (bundle.get("RecipeObj") != null) {
                 //edit mode
                 MODE = 1;
+                setRecipeToControls((Recipe)bundle.get("RecipeObj"));
             }
         }
 
@@ -97,6 +98,12 @@ public class RecipeEditActivity extends AppCompatActivity {
         recipe.Steps = _etSteps.getText().toString();
         recipe.CreatedUser = _currentUser.Email;
         return recipe;
+    }
+
+    private void setRecipeToControls(Recipe recipe){
+        _etName.setText(recipe.Name);
+        _etDesc.setText(recipe.ShortDescription);
+        _etSteps.setText(recipe.Steps);
     }
 
     private void goBackToMainPage(){

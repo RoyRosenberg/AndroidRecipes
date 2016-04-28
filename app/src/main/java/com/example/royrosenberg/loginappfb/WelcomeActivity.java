@@ -91,6 +91,7 @@ public class WelcomeActivity extends AppCompatActivity {
         });
 
         mainLayout = (RelativeLayout)findViewById(R.id.layoutView);
+        viewPager.setCurrentItem(3);
     }
 
     @Override
