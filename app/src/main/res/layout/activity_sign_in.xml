@@ -26,6 +26,7 @@
             android:background="@drawable/edittext_top_bg"
             android:padding="10dp"
             android:hint="Email"
+            android:textStyle="italic"
             android:textColorHint="#cccccc"
             android:drawableLeft="@drawable/email"/>
         <EditText
@@ -36,6 +37,7 @@
             android:layout_marginTop="-2dp"
             android:padding="10dp"
             android:hint="Password"
+            android:textStyle="italic"
             android:textColorHint="#cccccc"
             android:password="true"
             android:drawableLeft="@drawable/password"/>

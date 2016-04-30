@@ -1,10 +1,15 @@
 package com.example.royrosenberg.loginappfb;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,9 +22,11 @@ import com.example.royrosenberg.loginappfb.DM.User;
 import com.example.royrosenberg.loginappfb.Services.RecipeManager;
 import com.example.royrosenberg.loginappfb.Utils.MessageBox;
 
+import java.io.File;
+
 public class RecipeEditActivity extends AppCompatActivity {
 
-    private Button _button;
+    private Button _button, btnCbCancel;
     private EditText _etName, _etDesc, _etSteps;
     private RecipeManager _recipeMngr;
     private int MODE;//0 - add, 1 - edit
@@ -27,11 +34,14 @@ public class RecipeEditActivity extends AppCompatActivity {
     private ImageView _addNewRecipeImage;
     private ImageView imgCbGallery;
     private static int RESULT_LOAD = 1;
+    private View _fragmentView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_edit);
+
+        verifyStoragePermissions(this);
 
         LoadControls();
         _addNewRecipeImage.setOnClickListener(new View.OnClickListener() {
@@ -67,6 +77,13 @@ public class RecipeEditActivity extends AppCompatActivity {
     }
 
     private void LoadControls() {
+        btnCbCancel = (Button) findViewById(R.id.btnCancel);
+        btnCbCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         _button = (Button) findViewById(R.id.btnSaveRecipe);
         _button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,6 +128,7 @@ public class RecipeEditActivity extends AppCompatActivity {
         //edit
     }
 
+
     private Recipe getRecipeFromControls() {
         Recipe recipe = new Recipe();
         recipe.Name = _etName.getText().toString();
@@ -147,7 +165,45 @@ public class RecipeEditActivity extends AppCompatActivity {
             String picPath = cursor.getString(getColumnIndex);
             cursor.close();
 
-            imgCbGallery.setImageBitmap(BitmapFactory.decodeFile(picPath));
+            //File f = new File(picPath);
+            //boolean exists = f.exists();
+            //boolean canRead = f.canRead();
+            //picPath = f.getAbsolutePath();
+
+            Bitmap bitmap = BitmapFactory.decodeFile(picPath);
+            if(bitmap == null){
+                MessageBox msg = new MessageBox(this);
+                msg.Show("bitmap is null", "error", MessageBox.MessageBoxButtons.OK, null);
+            }
+            else _addNewRecipeImage.setImageBitmap(bitmap);
+
+        }
+    }
+
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    /**
+     * Checks if the app has permission to write to device storage
+     *
+     * If the app does not has permission then the user will be prompted to grant permissions
+     *
+     * @param activity
+     */
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
         }
     }
 }

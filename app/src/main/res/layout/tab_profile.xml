@@ -3,11 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@drawable/balloon_bg"
     tools:context="com.example.royrosenberg.loginappfb.RegisterActivity">
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -30,6 +26,7 @@
                 android:background="@drawable/edittext_default_bg"
                 android:drawableLeft="@drawable/user"
                 android:hint="Full Name"
+                android:textStyle="italic"
                 android:padding="10dp"
                 android:textColorHint="#bbbbbb" />
 
@@ -40,6 +37,7 @@
                 android:background="@drawable/edittext_top_bg"
                 android:drawableLeft="@drawable/email"
                 android:hint="Email"
+                android:textStyle="italic"
                 android:padding="10dp"
                 android:textColorHint="#bbbbbb" />
 
@@ -63,6 +61,7 @@
                 android:background="@drawable/edittext_bottom_bg"
                 android:drawableLeft="@drawable/password"
                 android:hint="Password"
+                android:textStyle="italic"
                 android:padding="10dp"
                 android:password="true"
                 android:textColorHint="#bbbbbb" />
@@ -75,6 +74,7 @@
                 android:background="@drawable/edittext_bottom_bg"
                 android:drawableLeft="@drawable/password"
                 android:hint="Reenter Password"
+                android:textStyle="italic"
                 android:padding="10dp"
                 android:password="true"
                 android:textColorHint="#bbbbbb" />
