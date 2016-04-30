@@ -17,12 +17,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.example.royrosenberg.loginappfb.DM.ImageResponse;
 import com.example.royrosenberg.loginappfb.DM.Recipe;
+import com.example.royrosenberg.loginappfb.DM.Upload;
 import com.example.royrosenberg.loginappfb.DM.User;
 import com.example.royrosenberg.loginappfb.Services.RecipeManager;
+import com.example.royrosenberg.loginappfb.Services.UploadService;
 import com.example.royrosenberg.loginappfb.Utils.MessageBox;
 
 import java.io.File;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class RecipeEditActivity extends AppCompatActivity {
 
@@ -35,6 +42,7 @@ public class RecipeEditActivity extends AppCompatActivity {
     private ImageView imgCbGallery;
     private static int RESULT_LOAD = 1;
     private View _fragmentView;
+    private File _fileToLoad = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,35 +106,63 @@ public class RecipeEditActivity extends AppCompatActivity {
     }
 
     public void btnSave_click(View view) {
-        //add
-        Recipe r = getRecipeFromControls();
 
-        final MessageBox msgBx = new MessageBox(this);
+        if (MODE == 0) {
+            //add recipe
+            Recipe r = getRecipeFromControls();
 
-        _recipeMngr.AddRecipe(r, new RecipeManager.RecipeCreationEvents() {
-            @Override
-            public void onSucceeded(Recipe recipe) {
-                msgBx.Show("Recipe saved", "Recipe Saved", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
+            if (_fileToLoad != null) {
+                //handle image save to Imgur site
+                Upload upload = new Upload();
+                upload.image = _fileToLoad;
+                upload.title = r.Name;
+                upload.description = r.ShortDescription;
+
+
+                //Start upload
+                new UploadService(this).Execute(upload, new Callback<ImageResponse>() {
                     @Override
-                    public void onOKClick() {
-                        goBackToMainPage();
+                    public void success(ImageResponse imageResponse, Response response) {
+                        final MessageBox msgBx = new MessageBox(RecipeEditActivity.this);
+                        Recipe r = getRecipeFromControls();
+                        r.ImageUrl = imageResponse.data.link;
+
+                        _recipeMngr.AddRecipe(r, new RecipeManager.RecipeCreationEvents() {
+                            @Override
+                            public void onSucceeded(Recipe recipe) {
+                                msgBx.Show("Recipe saved", "Recipe Saved", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
+                                    @Override
+                                    public void onOKClick() {
+                                        goBackToMainPage();
+                                    }
+
+                                    @Override
+                                    public void onCancelClick() {
+
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailed(Recipe recipe, String message) {
+                                msgBx.Show("Recipe did not saved\n" + message, "Failed", MessageBox.MessageBoxButtons.OK);
+                            }
+                        });
                     }
 
                     @Override
-                    public void onCancelClick() {
+                    public void failure(RetrofitError error) {
 
                     }
                 });
             }
-
-            @Override
-            public void onFailed(Recipe recipe, String message) {
-                msgBx.Show("Recipe did not saved\n" + message, "Failed", MessageBox.MessageBoxButtons.OK);
-            }
-        });
-
+        }
+    else
+    {
         //edit
     }
+
+}
 
 
     private Recipe getRecipeFromControls() {
@@ -165,30 +201,30 @@ public class RecipeEditActivity extends AppCompatActivity {
             String picPath = cursor.getString(getColumnIndex);
             cursor.close();
 
-            //File f = new File(picPath);
+            _fileToLoad = new File(picPath);
             //boolean exists = f.exists();
             //boolean canRead = f.canRead();
             //picPath = f.getAbsolutePath();
 
             Bitmap bitmap = BitmapFactory.decodeFile(picPath);
-            if(bitmap == null){
+            if (bitmap == null) {
                 MessageBox msg = new MessageBox(this);
                 msg.Show("bitmap is null", "error", MessageBox.MessageBoxButtons.OK, null);
-            }
-            else _addNewRecipeImage.setImageBitmap(bitmap);
+            } else _addNewRecipeImage.setImageBitmap(bitmap);
 
         }
     }
 
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
+// Storage Permissions
+private static final int REQUEST_EXTERNAL_STORAGE = 1;
+private static String[] PERMISSIONS_STORAGE = {
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+};
+
     /**
      * Checks if the app has permission to write to device storage
-     *
+     * <p/>
      * If the app does not has permission then the user will be prompted to grant permissions
      *
      * @param activity

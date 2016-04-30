@@ -17,7 +17,7 @@ public class Recipe implements Serializable {
     @JsonIgnore
     public String Key;
     //public int rate list ?
-    //image url
+    public String ImageUrl;
 
     public Recipe() {
         CreatedAt = new Date();
