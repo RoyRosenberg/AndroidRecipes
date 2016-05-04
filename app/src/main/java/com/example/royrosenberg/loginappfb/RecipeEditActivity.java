@@ -12,20 +12,26 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.example.royrosenberg.loginappfb.DM.ApplicationData;
 import com.example.royrosenberg.loginappfb.DM.ImageResponse;
 import com.example.royrosenberg.loginappfb.DM.Recipe;
 import com.example.royrosenberg.loginappfb.DM.Upload;
 import com.example.royrosenberg.loginappfb.DM.User;
+import com.example.royrosenberg.loginappfb.Services.DownloadImageTask;
 import com.example.royrosenberg.loginappfb.Services.RecipeManager;
 import com.example.royrosenberg.loginappfb.Services.UploadService;
 import com.example.royrosenberg.loginappfb.Utils.MessageBox;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -79,6 +85,11 @@ public class RecipeEditActivity extends AppCompatActivity {
 
         if (MODE == 0) {
             setTitle("Add Recipe");
+            try {
+                new DownloadImageTask(_addNewRecipeImage).execute("http://icons.iconseeker.com/png/fullsize/slate/food.png");
+            } catch (Exception ex) {
+                Log.e("Gali", ex.getMessage());
+            }
         } else {
             setTitle("Edit Recipe");
         }
@@ -118,52 +129,142 @@ public class RecipeEditActivity extends AppCompatActivity {
                 upload.title = r.Name;
                 upload.description = r.ShortDescription;
 
+                SaveRecipeWithImage(r, upload);
 
-                //Start upload
-                new UploadService(this).Execute(upload, new Callback<ImageResponse>() {
+            } else {
+                //add recipe without image - so set default image
+                r.ImageUrl = ApplicationData.IMAGE_DEFAULT_URL;
+                final MessageBox msgBx = new MessageBox(RecipeEditActivity.this);
+                _recipeMngr.AddRecipe(r, new RecipeManager.RecipeCreationEvents() {
                     @Override
-                    public void success(ImageResponse imageResponse, Response response) {
-                        final MessageBox msgBx = new MessageBox(RecipeEditActivity.this);
-                        Recipe r = getRecipeFromControls();
-                        r.ImageUrl = imageResponse.data.link;
-
-                        _recipeMngr.AddRecipe(r, new RecipeManager.RecipeCreationEvents() {
+                    public void onSucceeded(Recipe recipe) {
+                        msgBx.Show("Recipe saved", "Recipe Saved", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
                             @Override
-                            public void onSucceeded(Recipe recipe) {
-                                msgBx.Show("Recipe saved", "Recipe Saved", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
-                                    @Override
-                                    public void onOKClick() {
-                                        goBackToMainPage();
-                                    }
-
-                                    @Override
-                                    public void onCancelClick() {
-
-                                    }
-                                });
+                            public void onOKClick() {
+                                goBackToMainPage();
                             }
 
                             @Override
-                            public void onFailed(Recipe recipe, String message) {
-                                msgBx.Show("Recipe did not saved\n" + message, "Failed", MessageBox.MessageBoxButtons.OK);
+                            public void onCancelClick() {
+
                             }
                         });
                     }
 
                     @Override
-                    public void failure(RetrofitError error) {
-
+                    public void onFailed(Recipe recipe, String message) {
+                        msgBx.Show("Recipe did not saved\n" + message, "Failed", MessageBox.MessageBoxButtons.OK);
                     }
                 });
             }
+        } else {
+            //edit
+            Bundle bundle = getIntent().getExtras();
+            Recipe recipe = (Recipe) bundle.get("RecipeObj");
+            Recipe newRecipe = getRecipeFromControls();
+            recipe.Name = newRecipe.Name;
+            recipe.ShortDescription = newRecipe.ShortDescription;
+            recipe.Steps = newRecipe.Steps;
+            final MessageBox msgBx = new MessageBox(RecipeEditActivity.this);
+            if(_fileToLoad == null){
+                //no change in image, so only save the recipe
+                _recipeMngr.EditRecipe(recipe, new RecipeManager.RecipeCreationEvents() {
+                    @Override
+                    public void onSucceeded(Recipe recipe) {
+                        msgBx.Show("Recipe saved", "Recipe Saved", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
+                            @Override
+                            public void onOKClick() {
+                                goBackToMainPage();
+                            }
+
+                            @Override
+                            public void onCancelClick() {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailed(Recipe recipe, String message) {
+                        msgBx.Show("Recipe did not saved\n" + message, "Failed", MessageBox.MessageBoxButtons.OK);
+                    }
+                });
+            } else{
+                //save the image first, then save the recipe
+                Upload upload = new Upload();
+                upload.image = _fileToLoad;
+                upload.title = recipe.Name;
+                upload.description = recipe.ShortDescription;
+
+                SaveRecipeWithImage(recipe, upload);
+            }
+
         }
-    else
-    {
-        //edit
+
     }
 
-}
+    private void SaveRecipeWithImage(final Recipe recipe, Upload upload){
+        //Start upload
+        new UploadService(this).Execute(upload, new Callback<ImageResponse>() {
+            @Override
+            public void success(ImageResponse imageResponse, Response response) {
+                final MessageBox msgBx = new MessageBox(RecipeEditActivity.this);
+                recipe.ImageUrl = imageResponse.data.link;
 
+                if(MODE == 0) {
+                    _recipeMngr.AddRecipe(recipe, new RecipeManager.RecipeCreationEvents() {
+                        @Override
+                        public void onSucceeded(Recipe recipe) {
+                            msgBx.Show("Recipe saved", "Recipe Saved", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
+                                @Override
+                                public void onOKClick() {
+                                    goBackToMainPage();
+                                }
+
+                                @Override
+                                public void onCancelClick() {
+
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailed(Recipe recipe, String message) {
+                            msgBx.Show("Recipe did not saved\n" + message, "Failed", MessageBox.MessageBoxButtons.OK);
+                        }
+                    });
+                }
+                else {
+                    _recipeMngr.EditRecipe(recipe, new RecipeManager.RecipeCreationEvents() {
+                        @Override
+                        public void onSucceeded(Recipe recipe) {
+                            msgBx.Show("Recipe saved", "Recipe Saved", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
+                                @Override
+                                public void onOKClick() {
+                                    goBackToMainPage();
+                                }
+
+                                @Override
+                                public void onCancelClick() {
+
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailed(Recipe recipe, String message) {
+                            msgBx.Show("Recipe did not saved\n" + message, "Failed", MessageBox.MessageBoxButtons.OK);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+    }
 
     private Recipe getRecipeFromControls() {
         Recipe recipe = new Recipe();
@@ -171,6 +272,7 @@ public class RecipeEditActivity extends AppCompatActivity {
         recipe.ShortDescription = _etDesc.getText().toString();
         recipe.Steps = _etSteps.getText().toString();
         recipe.CreatedUser = _currentUser.Email;
+        recipe.ImageUrl = "";
         return recipe;
     }
 
@@ -178,6 +280,14 @@ public class RecipeEditActivity extends AppCompatActivity {
         _etName.setText(recipe.Name);
         _etDesc.setText(recipe.ShortDescription);
         _etSteps.setText(recipe.Steps);
+        try {
+            String url = ApplicationData.IMAGE_DEFAULT_URL;
+            if (!recipe.ImageUrl.isEmpty())
+                url = recipe.ImageUrl;
+            new DownloadImageTask(_addNewRecipeImage).execute(url);
+        } catch (Exception ex) {
+            Log.e("Gali", ex.getMessage());
+        }
     }
 
     private void goBackToMainPage() {
@@ -215,16 +325,16 @@ public class RecipeEditActivity extends AppCompatActivity {
         }
     }
 
-// Storage Permissions
-private static final int REQUEST_EXTERNAL_STORAGE = 1;
-private static String[] PERMISSIONS_STORAGE = {
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-};
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
     /**
      * Checks if the app has permission to write to device storage
-     * <p/>
+     * <p>
      * If the app does not has permission then the user will be prompted to grant permissions
      *
      * @param activity

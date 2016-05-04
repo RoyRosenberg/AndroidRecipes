@@ -11,6 +11,7 @@ public class ApplicationData {
     public static final String MY_IMGUR_CLIENT_ID = "77c459c520c9727";
     public static final String MY_IMGUR_CLIENT_SECRET = "00df8ea61e8c28073adf2bf0fce0f8627c214ccb";
     public static final String MY_IMGUR_REDIRECT_URL = "http://android";
+    public static final String IMAGE_DEFAULT_URL = "http://icons.iconseeker.com/png/fullsize/slate/food.png";
     public static String getClientAuth() {
         return "Client-ID " + MY_IMGUR_CLIENT_ID;
     }

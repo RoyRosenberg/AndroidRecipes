@@ -84,6 +84,24 @@ public class RecipeManager {
         fb.removeValue();
     }
 
+    public  void EditRecipe(final Recipe recipe, final RecipeCreationEvents event){
+        if(recipe == null)
+            throw new IllegalArgumentException("Invalid Recipe parameter");
+
+        String rec_url = _firebaseUrl + "/" + recipe.Key;
+        Firebase fb = new Firebase(rec_url);
+        fb.setValue(recipe, new Firebase.CompletionListener() {
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if (event != null) {
+                    if (firebaseError != null) {
+                        event.onFailed(recipe, firebaseError.getMessage());
+                    } else event.onSucceeded(recipe);
+                }
+            }
+        });
+    }
+
     public interface RecipeCreationEvents extends EventListener {
         void onSucceeded(Recipe recipe);
 

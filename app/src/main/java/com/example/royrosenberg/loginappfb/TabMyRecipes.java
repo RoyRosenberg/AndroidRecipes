@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.royrosenberg.loginappfb.DM.Recipe;
 import com.example.royrosenberg.loginappfb.DM.User;
@@ -25,6 +26,7 @@ public class TabMyRecipes extends Fragment {
     private User _currentUser;
     private RecyclerView _recyclerView;
     private View _fragmentView;
+    private ImageView _addNewRecipeImage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

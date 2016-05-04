@@ -3,6 +3,7 @@ package com.example.royrosenberg.loginappfb;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +12,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.royrosenberg.loginappfb.DM.ApplicationData;
 import com.example.royrosenberg.loginappfb.DM.Recipe;
 import com.example.royrosenberg.loginappfb.DM.User;
+import com.example.royrosenberg.loginappfb.Services.DownloadImageTask;
 import com.example.royrosenberg.loginappfb.Services.RecipeManager;
 import com.example.royrosenberg.loginappfb.Utils.MessageBox;
 import com.firebase.client.Firebase;
@@ -50,7 +53,14 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
         holder.recipe = current;
         holder.btnEdit.setTag(current);
         holder.btnDelete.setTag(current);
-        //holder.itemImage.setImageResource(images[position]);
+        try {
+            String url = ApplicationData.IMAGE_DEFAULT_URL;
+            if (!current.ImageUrl.isEmpty())
+                url = current.ImageUrl;
+            new DownloadImageTask(holder.itemImage).execute(url);
+        } catch (Exception ex) {
+            Log.e("Gali", ex.getMessage());
+        }
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -76,7 +86,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Recipe r =  (Recipe)v.getTag();
+                Recipe r = (Recipe) v.getTag();
 
                 Intent intent = new Intent(v.getContext(), RecipeEditActivity.class);
                 intent.putExtra("RecipeObj", r);
