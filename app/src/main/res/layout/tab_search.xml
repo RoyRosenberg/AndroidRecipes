@@ -1,5 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/balloon_bg">
 
-</RelativeLayout>
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="@string/search_string"
+            android:id="@+id/txtSearch"
+            android:background="#effdff"
+            android:textStyle="italic"
+            android:padding="10dp"
+            android:layout_marginTop="26dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignEnd="@+id/btnSignUp" />
+    <Button
+        android:id="@+id/btnSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_margin="4dp"
+        android:text="Search"
+        android:layout_below="@id/txtSearch"
+        android:background="@drawable/button_default_bg"
+        />
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/recycler_view"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    </android.support.v7.widget.RecyclerView>
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progBar"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        android:layout_below="@+id/btnSearch"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="34dp" />
+
+
+
+
+
+</LinearLayout>

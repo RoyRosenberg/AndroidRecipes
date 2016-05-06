@@ -16,7 +16,7 @@ public class Recipe implements Serializable {
     public String Steps;
     @JsonIgnore
     public String Key;
-    //public int rate list ?
+
     public String ImageUrl;
 
     public Recipe() {

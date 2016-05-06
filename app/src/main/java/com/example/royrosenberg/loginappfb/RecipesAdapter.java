@@ -15,12 +15,14 @@ import android.widget.TextView;
 import com.example.royrosenberg.loginappfb.DM.ApplicationData;
 import com.example.royrosenberg.loginappfb.DM.Recipe;
 import com.example.royrosenberg.loginappfb.DM.User;
+import com.example.royrosenberg.loginappfb.Services.DbHelper;
 import com.example.royrosenberg.loginappfb.Services.DownloadImageTask;
 import com.example.royrosenberg.loginappfb.Services.RecipeManager;
 import com.example.royrosenberg.loginappfb.Utils.MessageBox;
 import com.firebase.client.Firebase;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Roy.Rosenberg on 22/04/2016.
@@ -30,11 +32,16 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
     private ArrayList<Recipe> _recipeList;
     private RecipeManager _recipesMngr;
     private User _currentUser;
+    private boolean _showFavoritesButton, _showEditButton, _showDeletebutton;
 
-    public RecipesAdapter(ArrayList<Recipe> recipeList, RecipeManager mngr, User loggedUser) {
+    public RecipesAdapter(ArrayList<Recipe> recipeList, RecipeManager mngr, User loggedUser,
+                          boolean showFavorites, boolean showEdit, boolean showDelete) {
         _recipeList = recipeList;
         _recipesMngr = mngr;
         _currentUser = loggedUser;
+        _showDeletebutton = showDelete;
+        _showEditButton = showEdit;
+        _showFavoritesButton = showFavorites;
     }
 
     @Override
@@ -53,6 +60,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
         holder.recipe = current;
         holder.btnEdit.setTag(current);
         holder.btnDelete.setTag(current);
+        holder.btnFavorite.setTag(current);
         try {
             String url = ApplicationData.IMAGE_DEFAULT_URL;
             if (!current.ImageUrl.isEmpty())
@@ -64,7 +72,6 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-
                 MessageBox msg = new MessageBox(v.getContext());
                 msg.Show("Delete?", "Confirm", MessageBox.MessageBoxButtons.OK_CANCEL, new MessageBox.MessageBoxEvents() {
                     @Override
@@ -92,17 +99,37 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
                 intent.putExtra("RecipeObj", r);
                 intent.putExtra("UserObj", _currentUser);
                 v.getContext().startActivity(intent);
-                //startActivity(intent);
             }
         });
         holder.btnFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                //Recipe r =  (Recipe)v.getTag();
+            public void onClick(final View v) {
+                final Recipe r =  (Recipe)v.getTag();
                 MessageBox msg = new MessageBox(v.getContext());
-                msg.Show("add to favorites?", "Confirm", MessageBox.MessageBoxButtons.OK);
+                msg.Show("add to favorites?", "Confirm", MessageBox.MessageBoxButtons.OK, new MessageBox.MessageBoxEvents() {
+                    @Override
+                    public void onOKClick() {
+                        //add to favorites
+                        DbHelper dbHelper = new DbHelper(v.getContext());
+                        dbHelper.saveRecipeToFavorites(r);
+                    }
+
+                    @Override
+                    public void onCancelClick() {
+                    }
+                });
             }
         });
+
+        if(!_showFavoritesButton){
+            holder.btnFavorite.setVisibility(View.GONE);
+        }
+        if(!_showEditButton){
+            holder.btnEdit.setVisibility(View.GONE);
+        }
+        if(!_showDeletebutton){
+            holder.btnDelete.setVisibility(View.GONE);
+        }
     }
 
     @Override

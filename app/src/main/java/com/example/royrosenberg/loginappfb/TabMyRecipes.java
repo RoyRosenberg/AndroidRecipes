@@ -50,7 +50,7 @@ public class TabMyRecipes extends Fragment {
             public void onComplete(ArrayList<Recipe> result) {
                 //MessageBox msg = new MessageBox(getContext());
                 //msg.Show("Found " + result.size() + " recipes!", "result!", MessageBox.MessageBoxButtons.OK);
-                RecipesAdapter adapter = new RecipesAdapter(result, _recipeMngr, _currentUser);
+                RecipesAdapter adapter = new RecipesAdapter(result, _recipeMngr, _currentUser, false, true, true);
                 _recyclerView.setAdapter(adapter);
             }
         });

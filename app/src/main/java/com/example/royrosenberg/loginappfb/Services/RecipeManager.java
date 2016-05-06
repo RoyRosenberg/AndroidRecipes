@@ -11,6 +11,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
@@ -28,7 +29,7 @@ public class RecipeManager {
     }
 
     public void AddRecipe(final Recipe recipe, final RecipeCreationEvents event) {
-        if(recipe == null)
+        if (recipe == null)
             throw new IllegalArgumentException("Invalid Recipe parameter");
 
         _recipesFb.push().setValue(recipe, new Firebase.CompletionListener() {
@@ -43,10 +44,39 @@ public class RecipeManager {
         });
     }
 
-    public ArrayList<Recipe> GetUserRecipes(User user, final RecipeResultEvents event){
-        if(user == null)
+    public void SearchRecipe(String recipeName, final RecipeResultEvents event) {
+        if (recipeName == null)
+            throw new IllegalArgumentException("Invalid recipeName parameter");
+        if (recipeName.isEmpty())
+            throw new IllegalArgumentException("Invalid recipeName parameter");
+
+        final ArrayList<Recipe> resultList = new ArrayList<Recipe>();
+
+        //Create query for recipe search
+        Query queryRef = _recipesFb.orderByChild("Name").startAt(recipeName);
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
+                    Recipe r = (Recipe) messageSnapshot.getValue(Recipe.class);
+                    //messageSnapshot.getRef().getParent().
+                    r.Key = messageSnapshot.getKey();
+                    resultList.add(r);
+                }
+                event.onComplete(resultList);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
+    public void GetUserRecipes(User user, final RecipeResultEvents event) {
+        if (user == null)
             throw new IllegalArgumentException("Invalid user parameter");
-        if(event == null)
+        if (event == null)
             throw new IllegalArgumentException("Invalid event parameter");
 
         final ArrayList<Recipe> resultList = new ArrayList<Recipe>();
@@ -71,12 +101,10 @@ public class RecipeManager {
 
             }
         });
-
-        return resultList;
     }
 
-    public void DeleteRecipe(Recipe recipe){
-        if(recipe == null)
+    public void DeleteRecipe(Recipe recipe) {
+        if (recipe == null)
             throw new IllegalArgumentException("Invalid Recipe parameter");
 
         String rec_url = _firebaseUrl + "/" + recipe.Key;
@@ -84,8 +112,8 @@ public class RecipeManager {
         fb.removeValue();
     }
 
-    public  void EditRecipe(final Recipe recipe, final RecipeCreationEvents event){
-        if(recipe == null)
+    public void EditRecipe(final Recipe recipe, final RecipeCreationEvents event) {
+        if (recipe == null)
             throw new IllegalArgumentException("Invalid Recipe parameter");
 
         String rec_url = _firebaseUrl + "/" + recipe.Key;
@@ -102,6 +130,25 @@ public class RecipeManager {
         });
     }
 
+    public void GetRecipeByKey(String key, final RecipeSingleResultEvents event) {
+        String rec_url = _firebaseUrl + "/" + key;
+        Firebase fb = new Firebase(rec_url);
+        final Recipe recipe = null;
+        fb.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Recipe recipe = (Recipe) dataSnapshot.getValue(Recipe.class);
+                if (event != null)
+                    event.onComplete(recipe);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
     public interface RecipeCreationEvents extends EventListener {
         void onSucceeded(Recipe recipe);
 
@@ -113,4 +160,7 @@ public class RecipeManager {
 
     }
 
+    public interface RecipeSingleResultEvents extends EventListener {
+        void onComplete(Recipe result);
+    }
 }

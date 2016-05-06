@@ -74,12 +74,13 @@ public class RecipeEditActivity extends AppCompatActivity {
         //if recipe is set -> in edit mode, else in add mode
         MODE = 0; //default: add mode
         Bundle bundle = getIntent().getExtras();
+        Recipe editRecipe = null;
         if (bundle != null) {
             _currentUser = (User) bundle.get("UserObj");
             if (bundle.get("RecipeObj") != null) {
                 //edit mode
                 MODE = 1;
-                setRecipeToControls((Recipe) bundle.get("RecipeObj"));
+                editRecipe = (Recipe) bundle.get("RecipeObj");
             }
         }
 
@@ -92,6 +93,7 @@ public class RecipeEditActivity extends AppCompatActivity {
             }
         } else {
             setTitle("Edit Recipe");
+            setRecipeToControls(editRecipe);
         }
     }
 
