@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/balloon_bg"
-    tools:context="com.example.royrosenberg.loginappfb.RegisterActivity">
+    tools:context="com.finalproject.galiroth.myrecipes.RegisterActivity">
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"

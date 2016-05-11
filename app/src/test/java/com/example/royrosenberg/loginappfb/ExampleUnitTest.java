@@ -1,4 +1,4 @@
-package com.example.royrosenberg.loginappfb;
+package com.finalproject.galiroth.myrecipes;
 
 import org.junit.Test;
 

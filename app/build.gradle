@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.example.royrosenberg.loginappfb"
+        applicationId "com.finalproject.galiroth.myrecipes"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode 1

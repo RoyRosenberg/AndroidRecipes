@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/balloon_bg"
-    tools:context="com.example.royrosenberg.loginappfb.RecipeEditActivity">
+    tools:context="com.finalproject.galiroth.myrecipes.RecipeEditActivity">
 
 
     <LinearLayout

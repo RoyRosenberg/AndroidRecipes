@@ -8,7 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@drawable/balloon_bg"
-    tools:context="com.example.royrosenberg.loginappfb.MainActivity">
+    tools:context="com.finalproject.galiroth.myrecipes.MainActivity">
 
     <LinearLayout
         android:orientation="vertical"
